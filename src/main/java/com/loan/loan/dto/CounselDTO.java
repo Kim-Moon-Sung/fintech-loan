@@ -10,6 +10,7 @@ public class CounselDTO {
     @AllArgsConstructor
     @Builder
     @Getter
+    @Setter
     public static class Request {
 
         private String name;
