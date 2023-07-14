@@ -1,13 +1,14 @@
 package com.loan.loan.controller;
 
-import com.loan.loan.dto.ApplicationDTO;
 import com.loan.loan.dto.ApplicationDTO.AcceptTerms;
 import com.loan.loan.dto.ApplicationDTO.Request;
 import com.loan.loan.dto.ApplicationDTO.Response;
 import com.loan.loan.dto.ResponseDTO;
 import com.loan.loan.service.ApplicationServiceImpl;
+import com.loan.loan.service.FileStorageServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApplicationController extends AbstractController {
 
     private final ApplicationServiceImpl applicationService;
+    private final FileStorageServiceImpl fileStorageService;
 
     @PostMapping
     public ResponseDTO<Response> create(@RequestBody Request request) {
@@ -40,5 +42,11 @@ public class ApplicationController extends AbstractController {
     @PostMapping("/{applicationId}/terms")
     public ResponseDTO<Boolean> acceptTerms(@PathVariable Long applicationId, @RequestBody AcceptTerms request) {
         return ok(applicationService.acceptTerms(applicationId, request));
+    }
+
+    @PostMapping("/files")
+    public ResponseDTO<Void> upload(MultipartFile file) {
+        fileStorageService.save(file);
+        return ok();
     }
 }
