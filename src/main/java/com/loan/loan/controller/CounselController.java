@@ -1,6 +1,5 @@
 package com.loan.loan.controller;
 
-import com.loan.loan.dto.CounselDTO;
 import com.loan.loan.dto.CounselDTO.Request;
 import com.loan.loan.dto.CounselDTO.Response;
 import com.loan.loan.dto.ResponseDTO;
