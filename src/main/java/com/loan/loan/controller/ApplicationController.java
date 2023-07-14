@@ -3,12 +3,20 @@ package com.loan.loan.controller;
 import com.loan.loan.dto.ApplicationDTO.AcceptTerms;
 import com.loan.loan.dto.ApplicationDTO.Request;
 import com.loan.loan.dto.ApplicationDTO.Response;
+import com.loan.loan.dto.FileDTO;
 import com.loan.loan.dto.ResponseDTO;
 import com.loan.loan.service.ApplicationServiceImpl;
 import com.loan.loan.service.FileStorageServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -48,5 +56,26 @@ public class ApplicationController extends AbstractController {
     public ResponseDTO<Void> upload(MultipartFile file) {
         fileStorageService.save(file);
         return ok();
+    }
+
+    @GetMapping("files")
+    public ResponseEntity<Resource> download(@RequestParam(value = "fileName") String fileName) {
+        Resource file = fileStorageService.load(fileName);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+                .body(file);
+    }
+
+    @GetMapping("/files/info")
+    public ResponseDTO<List<FileDTO>> getFileInfos() {
+        List<FileDTO> fileInfos = fileStorageService.loadAll().map(path -> {
+            String fileName = path.getFileName().toString();
+            return FileDTO.builder()
+                    .name(fileName)
+                    .url(MvcUriComponentsBuilder.fromMethodName(ApplicationController.class, "download", fileName).build().toString())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return ok(fileInfos);
     }
 }
