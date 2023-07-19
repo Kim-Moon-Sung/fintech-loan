@@ -28,4 +28,9 @@ public class JudgementController extends AbstractController {
     public ResponseDTO<Response> getJudgementOfApplication(@PathVariable Long applicationId) {
         return ok(judgementService.getJudgementOfApplication(applicationId));
     }
+
+    @PutMapping("/{judgmentId}")
+    public ResponseDTO<Response> update(@PathVariable Long judgmentId, @RequestBody Request request) {
+        return ok(judgementService.update(judgmentId, request));
+    }
 }
