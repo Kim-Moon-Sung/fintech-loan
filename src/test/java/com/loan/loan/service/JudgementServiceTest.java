@@ -2,11 +2,11 @@ package com.loan.loan.service;
 
 import com.loan.loan.domain.Application;
 import com.loan.loan.domain.Judgment;
+import com.loan.loan.dto.ApplicationDTO.GrantAmount;
 import com.loan.loan.dto.JudgmentDTO.Request;
 import com.loan.loan.dto.JudgmentDTO.Response;
 import com.loan.loan.repository.ApplicationRepository;
 import com.loan.loan.repository.JudgementRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -124,5 +124,29 @@ public class JudgementServiceTest {
         judgementService.delete(1L);
 
         assertThat(entity.getIsDeleted()).isTrue();
+    }
+
+    @Test
+    void Should_ReturnUpdateResponseOfExistApplicationEntity_When_RequestGrantApprovalAmountOfJudgmentInfo() {
+
+        Judgment judgmentEntity = Judgment.builder()
+                .name("Member Kim")
+                .applicationId(1L)
+                .approvalAmount(BigDecimal.valueOf(5000000))
+                .build();
+
+        Application applicationEntity = Application.builder()
+                .applicationId(1L)
+                .approvalAmount(BigDecimal.valueOf(5000000))
+                .build();
+
+        when(judgementRepository.findById(1L)).thenReturn(Optional.ofNullable(judgmentEntity));
+        when(applicationRepository.findById(1L)).thenReturn(Optional.ofNullable(applicationEntity));
+        when(applicationRepository.save(any(Application.class))).thenReturn(applicationEntity);
+
+        GrantAmount actual = judgementService.grant(1L);
+
+        assertThat(actual.getApplicationId()).isSameAs(1L);
+        assertThat(actual.getApprovalAmount()).isSameAs(judgmentEntity.getApprovalAmount());
     }
 }
