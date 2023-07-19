@@ -46,7 +46,15 @@ public class JudgementServiceImpl implements JudgmentService {
 
     @Override
     public Response getJudgementOfApplication(Long applicationId) {
-        return null;
+        if (!isPresentApplication(applicationId)) {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        }
+
+        Judgment judgment = judgementRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR); // 신청 건에 대해서 심사가 완료되지 않은 경우
+        });
+
+        return modelMapper.map(judgment, Response.class);
     }
 
     private boolean isPresentApplication(Long applicationId) {
