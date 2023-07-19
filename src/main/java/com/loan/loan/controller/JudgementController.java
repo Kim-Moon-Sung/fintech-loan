@@ -33,4 +33,10 @@ public class JudgementController extends AbstractController {
     public ResponseDTO<Response> update(@PathVariable Long judgmentId, @RequestBody Request request) {
         return ok(judgementService.update(judgmentId, request));
     }
+
+    @DeleteMapping("/{judgmentId}")
+    public ResponseDTO<Void> delete(@PathVariable Long judgmentId) {
+        judgementService.delete(judgmentId);
+        return ok();
+    }
 }
