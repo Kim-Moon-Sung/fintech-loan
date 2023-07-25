@@ -2,6 +2,7 @@ package com.loan.loan.service;
 
 import com.loan.loan.domain.Balance;
 import com.loan.loan.dto.BalanceDTO;
+import com.loan.loan.dto.BalanceDTO.RepaymentRequest.RepaymentType;
 import com.loan.loan.dto.BalanceDTO.Request;
 import com.loan.loan.dto.BalanceDTO.Response;
 import com.loan.loan.exception.BaseException;
@@ -59,5 +60,38 @@ public class BalanceServiceImpl implements BalanceService {
         Balance updated = balanceRepository.save(balance);
 
         return modelMapper.map(updated, Response.class);
+    }
+
+    @Override
+    public Response repaymentUpdate(Long applicationId, BalanceDTO.RepaymentRequest request) {
+        Balance balance = balanceRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+
+        BigDecimal updatedBalance = balance.getBalance();
+        BigDecimal repaymentAmount = request.getRepaymentAmount();
+
+        // 상환 : balance - repaymentAmount
+        // 상환금 롤백 : balance + repaymentAmount
+        if(request.getType().equals(RepaymentType.ADD)) {
+            updatedBalance = updatedBalance.add(repaymentAmount);
+        } else {
+            updatedBalance = updatedBalance.subtract(repaymentAmount);
+        }
+
+        balance.setBalance(updatedBalance);
+        Balance updated = balanceRepository.save(balance);
+
+        return modelMapper.map(updated, Response.class);
+    }
+
+    @Override
+    public void delete(Long applicationId) {
+        Balance balance = balanceRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+
+        balance.setIsDeleted(true);
+        balanceRepository.save(balance);
     }
 }
