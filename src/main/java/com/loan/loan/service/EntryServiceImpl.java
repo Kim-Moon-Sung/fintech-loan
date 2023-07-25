@@ -5,6 +5,7 @@ import com.loan.loan.domain.Entry;
 import com.loan.loan.dto.BalanceDTO;
 import com.loan.loan.dto.EntryDTO.Request;
 import com.loan.loan.dto.EntryDTO.Response;
+import com.loan.loan.dto.EntryDTO.UpdateResponse;
 import com.loan.loan.exception.BaseException;
 import com.loan.loan.exception.ResultType;
 import com.loan.loan.repository.ApplicationRepository;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -56,6 +58,36 @@ public class EntryServiceImpl implements EntryService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public UpdateResponse update(Long entryId, Request request) {
+        // entry 존재 여부 validation
+        Entry entry = entryRepository.findById(entryId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+
+        // before -> after
+        BigDecimal beforeEntryAmount = entry.getEntryAmount();
+        entry.setEntryAmount(request.getEntryAmount());
+
+        entryRepository.save(entry);
+
+        // balance update
+        Long applicationId = entry.getApplicationId();
+        balanceService.update(applicationId,
+                BalanceDTO.UpdateRequest.builder()
+                        .beforeEntryAmount(beforeEntryAmount)
+                        .afterEntryAmount(request.getEntryAmount())
+                        .build());
+
+        // response
+        return UpdateResponse.builder()
+                .entryId(entryId)
+                .applicationId(applicationId)
+                .beforeEntryAmount(beforeEntryAmount)
+                .afterEntryAmount(request.getEntryAmount())
+                .build();
     }
 
     private boolean isContractedApplication(Long applicationId) {
