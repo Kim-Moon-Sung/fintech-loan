@@ -8,6 +8,7 @@ import com.loan.loan.dto.BalanceDTO.RepaymentRequest.RepaymentType;
 import com.loan.loan.dto.RepaymentDTO.ListResponse;
 import com.loan.loan.dto.RepaymentDTO.Request;
 import com.loan.loan.dto.RepaymentDTO.Response;
+import com.loan.loan.dto.RepaymentDTO.UpdateResponse;
 import com.loan.loan.exception.BaseException;
 import com.loan.loan.exception.ResultType;
 import com.loan.loan.repository.ApplicationRepository;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +65,38 @@ public class RepaymentServiceImpl implements RepaymentService {
         List<Repayment> repayments = repaymentRepository.findAllByApplicationId(applicationId);
 
         return repayments.stream().map(r -> modelMapper.map(r, ListResponse.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public UpdateResponse update(Long repaymentId, Request request) {
+        Repayment repayment = repaymentRepository.findById(repaymentId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+
+        Long applicationId = repayment.getApplicationId();
+        BigDecimal beforeRepaymentAmount = repayment.getRepaymentAmount();
+
+        balanceService.repaymentUpdate(applicationId,
+                BalanceDTO.RepaymentRequest.builder()
+                        .repaymentAmount(beforeRepaymentAmount)
+                        .type(RepaymentType.ADD)
+                        .build());
+
+        repayment.setRepaymentAmount(repayment.getRepaymentAmount());
+        repaymentRepository.save(repayment);
+
+        BalanceDTO.Response updatedBalance = balanceService.repaymentUpdate(applicationId,
+                BalanceDTO.RepaymentRequest.builder()
+                        .repaymentAmount(request.getRepaymentAmount())
+                        .type(RepaymentType.REMOVE)
+                        .build());
+
+        return UpdateResponse.builder()
+                .applicationId(applicationId)
+                .beforeRepaymentAmount(beforeRepaymentAmount)
+                .afterRepaymentAmount(request.getRepaymentAmount())
+                .balance(updatedBalance.getBalance())
+                .build();
     }
 
     private boolean isRepayableApplication(Long applicationId) {
