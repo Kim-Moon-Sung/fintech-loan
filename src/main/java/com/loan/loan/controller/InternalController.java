@@ -1,7 +1,9 @@
 package com.loan.loan.controller;
 
+import com.loan.loan.dto.EntryDTO;
 import com.loan.loan.dto.EntryDTO.Request;
 import com.loan.loan.dto.EntryDTO.Response;
+import com.loan.loan.dto.EntryDTO.UpdateResponse;
 import com.loan.loan.dto.ResponseDTO;
 import com.loan.loan.service.EntryService;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +24,10 @@ public class InternalController extends AbstractController {
     @GetMapping("/{applicationId}/entries")
     public ResponseDTO<Response> get(@PathVariable Long applicationId) {
         return ok(entryService.get(applicationId));
+    }
+
+    @PutMapping("/entries/{entryId}")
+    public ResponseDTO<UpdateResponse> update(@PathVariable Long entryId, @RequestBody Request request) {
+        return ok(entryService.update(entryId, request));
     }
 }
