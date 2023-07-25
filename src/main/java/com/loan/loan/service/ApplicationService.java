@@ -1,6 +1,5 @@
 package com.loan.loan.service;
 
-import com.loan.loan.dto.ApplicationDTO;
 import com.loan.loan.dto.ApplicationDTO.AcceptTerms;
 import com.loan.loan.dto.ApplicationDTO.Request;
 import com.loan.loan.dto.ApplicationDTO.Response;
@@ -16,4 +15,6 @@ public interface ApplicationService {
     void delete(Long applicationId);
 
     Boolean acceptTerms(Long applicationId, AcceptTerms request);
+
+    Response contract(Long applicationId);
 }

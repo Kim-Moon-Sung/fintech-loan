@@ -33,6 +33,7 @@ public class ApplicationDTO implements Serializable {
         private String email;
         private BigDecimal hopeAmount;
         private LocalDateTime appliedAt;
+        private LocalDateTime contractedAt;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }
