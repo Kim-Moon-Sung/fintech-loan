@@ -96,6 +96,8 @@ public class RepaymentServiceImpl implements RepaymentService {
                 .beforeRepaymentAmount(beforeRepaymentAmount)
                 .afterRepaymentAmount(request.getRepaymentAmount())
                 .balance(updatedBalance.getBalance())
+                .createdAt(repayment.getCreatedAt())
+                .updatedAt(repayment.getUpdatedAt())
                 .build();
     }
 
