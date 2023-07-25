@@ -1,0 +1,58 @@
+package com.loan.loan.service;
+
+import com.loan.loan.domain.Application;
+import com.loan.loan.domain.Entry;
+import com.loan.loan.dto.BalanceDTO;
+import com.loan.loan.dto.EntryDTO.Request;
+import com.loan.loan.dto.EntryDTO.Response;
+import com.loan.loan.exception.BaseException;
+import com.loan.loan.exception.ResultType;
+import com.loan.loan.repository.ApplicationRepository;
+import com.loan.loan.repository.EntryRepository;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class EntryServiceImpl implements EntryService {
+
+    private final BalanceService balanceService;
+
+    private final ApplicationRepository applicationRepository;
+    private final EntryRepository entryRepository;
+    private final ModelMapper modelMapper;
+
+    @Override
+    public Response create(Long applicationId, Request request) {
+
+        // 대출 신청 계약 체결 여부 validation
+        if(!isContractedApplication(applicationId)) {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        }
+
+        Entry entry = modelMapper.map(request, Entry.class);
+        entry.setApplicationId(applicationId);
+
+        entryRepository.save(entry);
+
+        // 대출 잔고 관리
+        balanceService.create(applicationId,
+                BalanceDTO.Request.builder()
+                        .entryAmount(request.getEntryAmount())
+                        .build());
+
+        return modelMapper.map(entry, Response.class);
+    }
+
+    private boolean isContractedApplication(Long applicationId) {
+        Optional<Application> existed = applicationRepository.findById(applicationId);
+        if(existed.isEmpty()) {
+            return false;
+        }
+
+        return existed.get().getContractedAt() != null;
+    }
+}
