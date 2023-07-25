@@ -1,11 +1,12 @@
 package com.loan.loan.controller;
 
-import com.loan.loan.dto.EntryDTO;
 import com.loan.loan.dto.EntryDTO.Request;
 import com.loan.loan.dto.EntryDTO.Response;
 import com.loan.loan.dto.EntryDTO.UpdateResponse;
+import com.loan.loan.dto.RepaymentDTO;
 import com.loan.loan.dto.ResponseDTO;
 import com.loan.loan.service.EntryService;
+import com.loan.loan.service.RepaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class InternalController extends AbstractController {
 
     private final EntryService entryService;
+    private final RepaymentService repaymentService;
 
     @PostMapping("/{applicationId}/entries")
     public ResponseDTO<Response> create(@PathVariable Long applicationId, @RequestBody Request request) {
@@ -35,5 +37,10 @@ public class InternalController extends AbstractController {
     public ResponseDTO<Void> delete(@PathVariable Long entryId) {
         entryService.delete(entryId);
         return ok();
+    }
+
+    @PostMapping("/{applicationId}/repayment")
+    public ResponseDTO<RepaymentDTO.Response> create(@PathVariable Long applicationId, @RequestBody RepaymentDTO.Request request) {
+        return ok(repaymentService.create(applicationId, request));
     }
 }
