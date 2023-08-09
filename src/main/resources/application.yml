@@ -2,10 +2,11 @@ server:
   port: 8080
 spring:
   datasource:
-    driverClassName: org.h2.Driver
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
+    driverClassName: com.mysql.cj.jdbc.Driver
+#    docker container 내부에 localhost 를 바라볼 수 있도록 설정
+    url: jdbc:mysql://host.docker.internal:3306/loan?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
   jpa:
     hibernate:
       ddl-auto: create
@@ -15,11 +16,8 @@ spring:
         show_sql: true
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-    database-platform: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      path: /h2-console
-      enabled: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: mysql
   servlet:
     multipart:
       max-file-size: 10MB
