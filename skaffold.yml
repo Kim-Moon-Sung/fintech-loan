@@ -1,0 +1,8 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+build:
+  artifacts:
+#   어떤 image 를 build 할 것인지
+    - image: fintech-loan
+      # JIB 로 빌드함
+      jib: {}
