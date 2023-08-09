@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.1'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'com.google.cloud.tools.jib' version '3.2.0'
 }
 
 group = 'com.loan'
@@ -13,6 +14,28 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+jib {
+    // 어떠한 base image를 기준으로 내가 만든 application에 대한 image를 생성할 것인지 정의
+    from {
+        image = "openjdk:11-jre-slim"
+    }
+    to {
+        image = 'fintech-loan'
+        tags = ['0.0.1']
+    }
+    container {
+        // fintech-loan 서버에서 class path 를 정의
+        mainClass = 'com.loan.loan.LoanApplication'
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        format = 'OCI'
+        volumes = ['/var/tmp']
+        // class path 를 같이 지정 해주어야함 -> 우리가 build 한 spring boot 의 class path 명시한다고 생각
+        entrypoint = ['java'
+                      , '-cp', '/app/resources:/app/classes:/app/libs/*'
+        , 'com.loan.loan.LoanApplication']
+    }
 }
 
 dependencies {
